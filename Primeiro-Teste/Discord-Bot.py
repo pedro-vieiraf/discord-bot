@@ -2,11 +2,11 @@ import os
 
 import discord
 import json
-from discord import app_commands
+from datetime import datetime
 from discord.ext import commands
 from dotenv import load_dotenv
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('TOKEN')
 
 
 intents = discord.Intents.default()
@@ -16,11 +16,29 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree  # Árvore de comandos para slash commands
 
 
+# Plataformas disponíveis e suas mensagens
+PLATAFORMAS_DISPONIVEIS = {
+    "netflix.com": {
+        "nome": "Netflix",
+        "mensagem": "🎬 A Netflix está disponível! Preparando para reproduzir..."
+    },
+    "youtube.com": {
+        "nome": "YouTube",
+        "mensagem": "📺 O YouTube está pronto! Enviando para reprodução..."
+    }
+}
+
+# Plataformas que ainda não estão prontas
+PLATAFORMAS_NAO_DISPONIVEIS = {
+    "primevideo.com": "Prime Video",
+    "disneyplus.com": "Disney+"
+}
+
 @tree.command(name="reproduzir", description="Seu link foi recebido com sucesso.")
 async def reproduzir(interaction: discord.Interaction, link: str):
     """Salva o link, o usuário e o canal de voz para outro bot usar."""
 
-    user = interaction.user.name  # Pega o nome do usuário que enviou o comando
+    user = interaction.user.name
     voice_channel = interaction.user.voice.channel if interaction.user.voice else None
 
     if not voice_channel:
@@ -30,14 +48,46 @@ async def reproduzir(interaction: discord.Interaction, link: str):
         )
         return
 
-    guild_name = interaction.guild.name  # Nome do servidor
+    plataforma = None
+    mensagem = None
+
+    # Verificar se a plataforma está disponível
+    for dominio, dados in PLATAFORMAS_DISPONIVEIS.items():
+        if dominio in link:
+            plataforma = dados["nome"]
+            mensagem = dados["mensagem"]
+            break
+
+    # Se a plataforma ainda não está disponível
+    if not plataforma:
+        for dominio, nome in PLATAFORMAS_NAO_DISPONIVEIS.items():
+            if dominio in link:
+                await interaction.response.send_message(
+                    f"⚠️ **{nome} ainda não está disponível para reprodução.**",
+                    ephemeral=True
+                )
+                return
+
+    # Se não for uma plataforma reconhecida
+    if not plataforma:
+        await interaction.response.send_message(
+            "❌ Essa plataforma não tem compatibilidade.",
+            ephemeral=True
+        )
+        return
+
+    # Adicionar horário atual
+    horario = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    guild_name = interaction.guild.name
 
     # Criar dicionário com os dados
     data = {
         "Usuário": user,
         "Servidor": guild_name,
         "Canal de Voz": voice_channel.name,
-        "Link": link
+        "Plataforma": plataforma,
+        "Link": link,
+        "Horário": horario
     }
 
     # Salvar em JSON
@@ -48,11 +98,8 @@ async def reproduzir(interaction: discord.Interaction, link: str):
     print("\n=== Requisition ===")
     print(json.dumps(data, indent=4, ensure_ascii=False))
 
-    await interaction.response.send_message(
-        "Informações salvas! O bot do Selenium pode usá-las agora.",
-        ephemeral=True
-    )
-
+    # Enviar mensagem personalizada para a plataforma
+    await interaction.response.send_message(f"✅ {mensagem}", ephemeral=True)
 
 @tree.command(name="hello", description="Diz Hello")
 async def hello(interaction: discord.Interaction):

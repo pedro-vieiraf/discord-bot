@@ -1,20 +1,18 @@
 import os
-
 import discord
 import json
 from datetime import datetime
 from discord.ext import commands
 from dotenv import load_dotenv
 load_dotenv()
-TOKEN = os.getenv('TOKEN')
 
+TOKEN = os.getenv('TOKEN')
 
 intents = discord.Intents.default()
 intents.voice_states = True  # Permite detectar canais de voz
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree  # Árvore de comandos para slash commands
-
 
 # Plataformas disponíveis e suas mensagens
 PLATAFORMAS_DISPONIVEIS = {
@@ -80,6 +78,9 @@ async def reproduzir(interaction: discord.Interaction, link: str):
     horario = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     guild_name = interaction.guild.name
 
+    # Criar o link do canal de voz
+    channel_url = f"https://discord.com/channels/{interaction.guild.id}/{voice_channel.id}"
+
     # Criar dicionário com os dados
     data = {
         "Usuário": user,
@@ -87,7 +88,8 @@ async def reproduzir(interaction: discord.Interaction, link: str):
         "Canal de Voz": voice_channel.name,
         "Plataforma": plataforma,
         "Link": link,
-        "Horário": horario
+        "Horário": horario,
+        "Canal URL": channel_url
     }
 
     # Salvar em JSON
@@ -105,12 +107,10 @@ async def reproduzir(interaction: discord.Interaction, link: str):
 async def hello(interaction: discord.Interaction):
     await interaction.response.send_message(f"Olá {interaction.user.mention}!")
 
-
 @tree.command(name="soma", description="Some dois números")
 async def Soma(interaction: discord.Interaction, numero1: int, numero2: int):
     numero_somado = numero1 + numero2
     await interaction.response.send_message(f"A soma de {numero1} + {numero2} = {numero_somado}")
-
 
 @bot.event
 async def on_ready():
@@ -120,6 +120,5 @@ async def on_ready():
         print(f"Bot conectado como {bot.user}")
     except Exception as e:
         print(f"Erro ao sincronizar comandos: {e}")
-
 
 bot.run(TOKEN)

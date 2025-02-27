@@ -103,14 +103,6 @@ async def reproduzir(interaction: discord.Interaction, link: str):
     # Enviar mensagem personalizada para a plataforma
     await interaction.response.send_message(f"✅ {mensagem}", ephemeral=True)
 
-@tree.command(name="hello", description="Diz Hello")
-async def hello(interaction: discord.Interaction):
-    await interaction.response.send_message(f"Olá {interaction.user.mention}!")
-
-@tree.command(name="soma", description="Some dois números")
-async def Soma(interaction: discord.Interaction, numero1: int, numero2: int):
-    numero_somado = numero1 + numero2
-    await interaction.response.send_message(f"A soma de {numero1} + {numero2} = {numero_somado}")
 
 @bot.event
 async def on_ready():

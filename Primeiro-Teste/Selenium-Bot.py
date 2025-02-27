@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from detectar_tela import detectar_e_clicar
+from detectar_tela import compartilhar_tela
 
 # Defina o caminho do executável do Chrome
 chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"  # Altere conforme necessário
@@ -75,36 +75,7 @@ def entrar_no_canal(navegador, canal_nome):
     except Exception as e:
         print("Erro ao tentar entrar no canal:", e)
 
-
-def compartilhar_tela(navegador):
-    try:
-        # Aguarda até que o botão de compartilhar esteja clicável (até 10 segundos)
-        botao_compartilhar = WebDriverWait(navegador, 10).until(
-            EC.element_to_be_clickable(
-                (By.XPATH, '//*[@id="app-mount"]/div[2]/div[1]/div[1]/div/div[2]/div/div/div/div/div[1]/section/div[1]/div/div[2]/button[2]')
-            )
-        )
-
-        # Clica no botão de compartilhar
-        botao_compartilhar.click()
-        print("Botão de compartilhar clicado.")
-
-        # Aguarda um pouco para que a interface de compartilhamento apareça
-        # e tenta detectar e clicar na área de compartilhamento.
-        # A função detectar_e_clicar() deve ser implementada para retornar True se o clique foi bem-sucedido.
-        if detectar_e_clicar():
-            print("Área de compartilhamento selecionada com sucesso.")
-        else:
-            print("Falha ao detectar a área de compartilhamento.")
-
-        # Após selecionar a área, pressiona Enter para confirmar o compartilhamento.
-        # O envio do ENTER pode ser feito para o elemento ativo.
-        WebDriverWait(navegador, 5).until(EC.element_to_be_clickable((By.TAG_NAME, "body")))
-        navegador.switch_to.active_element.send_keys(Keys.ENTER)
-        print("Confirmado com ENTER, tela compartilhada com sucesso!")
-
-    except Exception as e:
-        print("Erro ao compartilhar a tela:", e)
+compartilhar_tela(navegador)
 
 while True:
     # Verifica se o arquivo foi modificado
